@@ -1,0 +1,38 @@
+{
+  "name": "emerald-silver",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "create-admin": "tsx scripts/create-admin.ts",
+    "check-users": "tsx scripts/check-users.ts"
+  },
+  "dependencies": {
+    "@types/node": "^22.15.30",
+    "@types/pg": "^8.15.4",
+    "bcryptjs": "^3.0.2",
+    "drizzle-kit": "^0.31.1",
+    "drizzle-orm": "^0.44.2",
+    "jsonwebtoken": "^9.0.2",
+    "nuxt": "^3.17.5",
+    "pg": "^8.16.0",
+    "resend": "^4.5.2",
+    "twilio": "^5.7.0",
+    "vue": "^3.5.16",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@nuxtjs/tailwindcss": "^7.0.0-beta.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.9",
+    "tsx": "^4.19.4"
+  }
+}
