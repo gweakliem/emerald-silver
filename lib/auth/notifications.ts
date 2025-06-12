@@ -57,3 +57,69 @@ export async function sendOTPSMS(phone: string, code: string) {
     return { success: false, error }
   }
 }
+
+export async function sendInvitationEmail(email: string, clientName: string, loginUrl: string) {
+  try {
+    // In development, log the invitation instead of sending email if no API key
+    if (!resend || process.env.NODE_ENV === 'development') {
+      console.log('📧 [DEV] Invitation Email for', email, '- Login at:', loginUrl)
+      return { success: true }
+    }
+
+    await resend.emails.send({
+      from: process.env.FROM_EMAIL || 'noreply@example.com',
+      to: email,
+      subject: 'Welcome - Your Therapist Has Invited You',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Welcome ${clientName}!</h2>
+          <p>Your therapist has invited you to access your personalized worksheets and activities.</p>
+          
+          <div style="background: #f8f9fa; border-left: 4px solid #007bff; padding: 20px; margin: 20px 0;">
+            <h3 style="margin-top: 0;">Getting Started</h3>
+            <p>Click the link below to access your client portal:</p>
+            <a href="${loginUrl}" style="display: inline-block; background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 10px 0;">
+              Access Your Portal
+            </a>
+          </div>
+          
+          <p><strong>What to expect:</strong></p>
+          <ul>
+            <li>Secure login using your email or phone number</li>
+            <li>Access to worksheets assigned by your therapist</li>
+            <li>Easy-to-use interface optimized for mobile devices</li>
+          </ul>
+          
+          <p>If you have any questions, please contact your therapist directly.</p>
+          <p style="color: #666; font-size: 12px; margin-top: 30px;">
+            If you did not expect this invitation, please ignore this email.
+          </p>
+        </div>
+      `,
+    })
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to send invitation email:', error)
+    return { success: false, error }
+  }
+}
+
+export async function sendInvitationSMS(phone: string, clientName: string, loginUrl: string) {
+  try {
+    // In development, log the invitation instead of sending SMS if no API credentials
+    if (!twilioClient || process.env.NODE_ENV === 'development') {
+      console.log('📱 [DEV] Invitation SMS for', phone, '- Login at:', loginUrl)
+      return { success: true }
+    }
+
+    await twilioClient.messages.create({
+      body: `Hi ${clientName}! Your therapist has invited you to access your worksheets. Login here: ${loginUrl}`,
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: phone,
+    })
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to send invitation SMS:', error)
+    return { success: false, error }
+  }
+}

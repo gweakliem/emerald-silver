@@ -1,11 +1,11 @@
 # Emerald Silver
 
-A mobile-responsive web application for therapists to manage worksheets for clients. Built with Nuxt.js and TypeScript, featuring OTP-based authentication for admins and clients, with standard email/password authentication for therapists.
+A mobile-responsive web application for providers to manage worksheets for clients. Built with Nuxt.js and TypeScript, featuring OTP-based authentication for admins and clients, with standard email/password authentication for providers.
 
 ## Features
 
 - **Admin Dashboard**: OTP-based authentication with system oversight capabilities
-- **Therapist Management**: Email/password authentication with client and worksheet management
+- **Provider Management**: Email/password authentication with client and worksheet management
 - **Client Portal**: OTP-based authentication for worksheet completion
 - **Worksheet System**: Template creation, assignment, and review workflow
 - **Mobile-First Design**: Responsive interface optimized for all devices
@@ -174,7 +174,7 @@ npm run typecheck     # Run TypeScript checks
 /
 ├── components/          # Vue components
 │   ├── admin/          # Admin-specific components
-│   ├── therapist/      # Therapist-specific components
+│   ├── provider/      # Provider-specific components
 │   ├── client/         # Client-specific components
 │   └── shared/         # Shared components
 ├── pages/              # Nuxt.js pages/routes
@@ -208,8 +208,8 @@ npm run typecheck     # Run TypeScript checks
 ## Database Schema
 
 ### Core Tables
-- **users**: Admins and therapists with role-based access
-- **clients**: Client records managed by therapists
+- **users**: Admins and providers with role-based access
+- **clients**: Client records managed by providers
 - **otp_codes**: Time-limited verification codes
 - **worksheet_templates**: Form definitions (future)
 - **worksheet_instances**: Completed worksheets (future)
@@ -219,7 +219,7 @@ npm run typecheck     # Run TypeScript checks
 - **Input Validation**: Server-side validation for all inputs
 - **Session Management**: Secure JWT tokens with HTTP-only cookies
 - **OTP Security**: Time-limited codes with single-use enforcement
-- **Role-based Access**: Middleware protection for admin/therapist routes
+- **Role-based Access**: Middleware protection for admin/provider routes
 - **CSRF Protection**: SameSite cookie configuration
 
 ## Deployment

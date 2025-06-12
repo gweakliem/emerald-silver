@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A mobile-responsive web application for therapists to manage worksheets for clients. Built with Nuxt.js and TypeScript, deployed to Vercel.
+A mobile-responsive web application for providers to manage worksheets for clients. Built with Nuxt.js and TypeScript, deployed to Vercel.
 
 ## Development Commands
 
@@ -112,7 +112,7 @@ NODE_ENV=development                   # Environment (development/production)
 /
 ├── components/          # Vue components
 │   ├── admin/          # Admin-specific components
-│   ├── therapist/      # Therapist-specific components
+│   ├── provider/      # Provider-specific components
 │   ├── client/         # Client-specific components
 │   └── shared/         # Shared components
 ├── pages/              # Nuxt.js pages/routes
@@ -126,36 +126,36 @@ NODE_ENV=development                   # Environment (development/production)
 ```
 
 ### Core User Flows
-1. **Admin Flow**: OTP Login → Dashboard → Manage therapists → System oversight
-2. **Therapist Flow**: Email/Password Login → Dashboard → Manage clients/worksheets → Review submissions
+1. **Admin Flow**: OTP Login → Dashboard → Manage Providers → System oversight
+2. **Provider Flow**: Email/Password Login → Dashboard → Manage clients/worksheets → Review submissions
 3. **Client Flow**: OTP Login → Dashboard → Complete worksheets → Submit
 
 ### Key Data Models
-- **Users**: Therapists (email/password auth) and system admins (OTP auth)
-- **Clients**: Therapist-owned records with phone/email for OTP authentication
+- **Users**: Providers (email/password auth) and system admins (OTP auth)
+- **Clients**: Provider-owned records with phone/email for OTP authentication
 - **Worksheet Templates**: Form definitions with prompts and response fields
-- **Worksheet Instances**: Client-completed worksheets with therapist notes
+- **Worksheet Instances**: Client-completed worksheets with Provider notes
 - **OTP Codes**: Time-limited (5min) authentication codes for clients and admins
 
 ## Authentication Strategy
-- **Therapists**: Standard email/password authentication
+- **Providers**: Standard email/password authentication
 - **Admins**: OTP-based authentication via SMS or email (same system as clients)
 - **Clients**: OTP-based authentication via SMS or email
-- **Access Control**: Therapists can only access their own clients' data, Admins can manage therapists
+- **Access Control**: Providers can only access their own clients' data, Admins can manage providers
 
 ## Features
 
 ### User Authentication
-- Therapist authentication via email/password
+- Provider authentication via OTP (SMS/email) with 5-minute expiration
 - Admin authentication via OTP (SMS/email) with 5-minute expiration
 - Client authentication via OTP (SMS/email) with 5-minute expiration
-- Secure access control ensuring therapists only see their clients and admins can manage therapists
+- Secure access control ensuring providers only see their clients and admins can manage providers
 
 ### Admin Dashboard
-- Therapist management interface (add, edit, remove therapists)
+- Provider management interface (add, edit, remove providers)
 - System overview and management
 
-### Therapist Dashboard
+### Provider Dashboard
 - Client management interface
 - Worksheet to-do list with review links
 - Worksheet template management access
@@ -163,13 +163,13 @@ NODE_ENV=development                   # Environment (development/production)
 ### Client Management
 - CRUD operations for client records
 - Worksheet assignment with automatic notifications
-- Therapist-scoped access control
+- Provider-scoped access control
 
 ### Worksheet System
 - Template creation and management
 - Form-based worksheets with prompt/response sections
 - Assignment workflow with notifications
-- Review system with therapist notes
+- Review system with provider notes
 - PDF export functionality
 
 ### Client Experience
@@ -181,13 +181,13 @@ NODE_ENV=development                   # Environment (development/production)
 
 ### File Organization
 When implementing:
-- Separate components for therapist and client interfaces
+- Separate components for provider and client interfaces
 - Shared components for common UI elements
 - API routes for backend functionality
 
 ### Security Considerations
 - Implement proper session management
-- Validate therapist-client relationships on all operations
+- Validate provider-client relationships on all operations
 - Secure OTP generation and validation
 - Input validation and sanitization
 

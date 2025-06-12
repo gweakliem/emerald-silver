@@ -15,8 +15,8 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "therapist_id": {
-          "name": "therapist_id",
+        "provider_id": {
+          "name": "provider_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
@@ -69,12 +69,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "clients_therapist_id_users_id_fk": {
-          "name": "clients_therapist_id_users_id_fk",
+        "clients_provider_id_users_id_fk": {
+          "name": "clients_provider_id_users_id_fk",
           "tableFrom": "clients",
           "tableTo": "users",
           "columnsFrom": [
-            "therapist_id"
+            "provider_id"
           ],
           "columnsTo": [
             "id"
@@ -188,7 +188,7 @@
           "type": "varchar(20)",
           "primaryKey": false,
           "notNull": true,
-          "default": "'therapist'"
+          "default": "'provider'"
         },
         "name": {
           "name": "name",

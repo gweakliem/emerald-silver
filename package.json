@@ -13,7 +13,9 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "create-admin": "tsx scripts/create-admin.ts",
-    "check-users": "tsx scripts/check-users.ts"
+    "check-users": "tsx scripts/check-users.ts",
+    "seed-data": "tsx scripts/seed-sample-data.ts",
+    "create-test-provider": "tsx scripts/create-test-provider.ts"
   },
   "dependencies": {
     "@types/node": "^22.15.30",

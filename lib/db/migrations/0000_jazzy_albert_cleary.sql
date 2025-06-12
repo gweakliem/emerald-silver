@@ -1,6 +1,6 @@
 CREATE TABLE "clients" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"therapist_id" uuid NOT NULL,
+	"provider_id" uuid NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"email" varchar(255),
 	"phone" varchar(20),
@@ -26,7 +26,7 @@ CREATE TABLE "users" (
 	"email" varchar(255),
 	"phone" varchar(20),
 	"password_hash" varchar(255),
-	"role" varchar(20) DEFAULT 'therapist' NOT NULL,
+	"role" varchar(20) DEFAULT 'provider' NOT NULL,
 	"name" varchar(255),
 	"is_active" boolean DEFAULT true,
 	"created_at" timestamp DEFAULT now(),
@@ -34,4 +34,4 @@ CREATE TABLE "users" (
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
-ALTER TABLE "clients" ADD CONSTRAINT "clients_therapist_id_users_id_fk" FOREIGN KEY ("therapist_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "clients" ADD CONSTRAINT "clients_provider_id_users_id_fk" FOREIGN KEY ("provider_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
