@@ -5,6 +5,10 @@ import { desc } from 'drizzle-orm'
 import crypto from 'crypto'
 
 export function generateOTPCode(): string {
+  // For debugging - use fixed code in development
+  if (process.env.NODE_ENV === 'development') {
+    return '123456'
+  }
   return crypto.randomInt(100000, 999999).toString()
 }
 
@@ -32,6 +36,8 @@ export async function verifyOTPCode(
   code: string,
   purpose: 'login' | 'verification' = 'login'
 ): Promise<boolean> {
+  console.log('🔍 OTP Verification Details:', { identifier, code, purpose })
+  
   const otpRecord = await db
     .select()
     .from(otpCodes)
@@ -46,10 +52,14 @@ export async function verifyOTPCode(
     )
     .limit(1)
 
+  console.log('📋 OTP Record found:', otpRecord)
+
   if (otpRecord.length === 0) {
+    console.log('❌ No valid OTP record found')
     return false
   }
 
+  console.log('✅ Valid OTP found, marking as used')
   // Mark OTP as used
   await db
     .update(otpCodes)

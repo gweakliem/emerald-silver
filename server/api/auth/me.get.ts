@@ -1,6 +1,6 @@
 import { verifySession } from '~/lib/auth/session'
 import { db } from '~/lib/db'
-import { users } from '~/lib/db/schema'
+import { users, clients } from '~/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -23,27 +23,58 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Get fresh user data
-    const user = await db
-      .select({
-        id: users.id,
-        role: users.role,
-        name: users.name,
-        email: users.email,
-        phone: users.phone,
-      })
-      .from(users)
-      .where(eq(users.id, sessionData.userId))
-      .limit(1)
+    let userData
 
-    if (user.length === 0) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'User not found'
-      })
+    if (sessionData.role === 'client') {
+      // Get client data
+      const client = await db
+        .select({
+          id: clients.id,
+          name: clients.name,
+          email: clients.email,
+          phone: clients.phone,
+          providerId: clients.providerId,
+        })
+        .from(clients)
+        .where(eq(clients.id, sessionData.userId))
+        .limit(1)
+
+      if (client.length === 0) {
+        throw createError({
+          statusCode: 404,
+          statusMessage: 'Client not found'
+        })
+      }
+
+      userData = {
+        ...client[0],
+        role: 'client'
+      }
+    } else {
+      // Get user data (admin/provider)
+      const user = await db
+        .select({
+          id: users.id,
+          role: users.role,
+          name: users.name,
+          email: users.email,
+          phone: users.phone,
+        })
+        .from(users)
+        .where(eq(users.id, sessionData.userId))
+        .limit(1)
+
+      if (user.length === 0) {
+        throw createError({
+          statusCode: 404,
+          statusMessage: 'User not found'
+        })
+      }
+
+      userData = user[0]
     }
 
-    return { user: user[0] }
+    return { user: userData }
 
   } catch (error) {
     if (error.statusCode) {

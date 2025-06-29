@@ -5,9 +5,10 @@ const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key'
 
 export interface SessionData {
   userId: string
-  role: 'admin' | 'provider'
+  role: 'admin' | 'provider' | 'client'
   email?: string
   phone?: string
+  providerId?: string
 }
 
 export function createSession(userData: SessionData): string {

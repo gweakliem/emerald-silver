@@ -1,6 +1,6 @@
 export default defineNuxtRouteMiddleware(async (to) => {
   // Skip auth for login pages, API routes, and home page
-  const publicPages = ['/admin/login', '/admin/verify', '/provider/login', '/provider/verify', '/']
+  const publicPages = ['/admin/login', '/admin/verify', '/provider/login', '/provider/verify', '/client/login', '/client/verify', '/']
   const isPublicPage = publicPages.some(page => to.path === page)
   
   if (isPublicPage || to.path.startsWith('/api/')) {
@@ -30,6 +30,19 @@ export default defineNuxtRouteMiddleware(async (to) => {
       }
     } catch {
       return navigateTo('/provider/login')
+    }
+  }
+
+  // Check if route requires client authentication
+  if (to.path.startsWith('/client')) {
+    try {
+      const response = await $fetch('/api/auth/me')
+      
+      if (!response?.user || response.user.role !== 'client') {
+        return navigateTo('/client/login')
+      }
+    } catch {
+      return navigateTo('/client/login')
     }
   }
 })

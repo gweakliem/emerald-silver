@@ -196,6 +196,10 @@ When implementing:
 - Ensure all forms work well on mobile devices
 - Touch-friendly interface elements
 
+### Coding Standards
+- Use only shadcn-vue components with Tailwind CSS for styling.
+- Use TypeScript for all code.
+
 ## Important Instructions
 - Do what has been asked; nothing more, nothing less
 - NEVER create files unless absolutely necessary
