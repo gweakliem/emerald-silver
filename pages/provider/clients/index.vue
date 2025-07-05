@@ -96,9 +96,12 @@
         <div class="bg-white shadow overflow-hidden sm:rounded-md">
           <ul role="list" class="divide-y divide-gray-200">
             <li v-for="client in clients" :key="client.id">
-              <div class="px-4 py-4 sm:px-6">
+              <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 transition-colors">
                 <div class="flex items-center justify-between">
-                  <div class="flex items-center">
+                  <div 
+                    class="flex items-center flex-1 min-w-0 cursor-pointer"
+                    @click="navigateToClient(client.id)"
+                  >
                     <div class="flex-shrink-0">
                       <div class="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
                         <span class="text-sm font-medium text-white">
@@ -106,9 +109,9 @@
                         </span>
                       </div>
                     </div>
-                    <div class="ml-4">
+                    <div class="ml-4 flex-1 min-w-0">
                       <div class="flex items-center">
-                        <p class="text-sm font-medium text-gray-900">
+                        <p class="text-sm font-medium text-gray-900 truncate">
                           {{ client.name }}
                         </p>
                         <span 
@@ -123,7 +126,7 @@
                           <svg class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                           </svg>
-                          <span>{{ client.email }}</span>
+                          <span class="truncate">{{ client.email }}</span>
                         </div>
                         <div v-if="client.phone" :class="{ 'ml-4': client.email }" class="flex items-center">
                           <svg class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,18 +136,18 @@
                         </div>
                       </div>
                       <div v-if="client.notes" class="mt-1">
-                        <p class="text-sm text-gray-600">{{ client.notes }}</p>
+                        <p class="text-sm text-gray-600 truncate">{{ client.notes }}</p>
                       </div>
                     </div>
                   </div>
                   
-                  <div class="flex items-center space-x-2">
+                  <div class="flex items-center space-x-2 ml-4">
                     <p class="text-sm text-gray-500">
                       Added {{ formatDate(client.createdAt) }}
                     </p>
                     <div class="flex space-x-1">
                       <button
-                        @click="editClient(client)"
+                        @click.stop="editClient(client)"
                         class="text-gray-400 hover:text-gray-600"
                         title="Edit client"
                       >
@@ -153,7 +156,7 @@
                         </svg>
                       </button>
                       <button
-                        @click="toggleClientStatus(client)"
+                        @click.stop="toggleClientStatus(client)"
                         :class="client.isActive ? 'text-red-400 hover:text-red-600' : 'text-green-400 hover:text-green-600'"
                         :title="client.isActive ? 'Deactivate client' : 'Activate client'"
                       >
@@ -222,6 +225,11 @@ function handleClientCreated(newClient) {
   // Add the new client to the list
   clients.value.unshift(newClient)
   showAddClientModal.value = false
+}
+
+function navigateToClient(clientId) {
+  console.log('Navigating to client:', clientId)
+  navigateTo(`/provider/clients/${clientId}`)
 }
 
 function formatDate(dateString) {

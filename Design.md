@@ -74,3 +74,23 @@ Misuse - think about how a system like this could be applied to illegal activiti
 One place I could see trouble is if the site allows uploading data securely, it could be used as a relatively low-cost file exchange mechanism. Also unlimited data uploads could break my storage budgets.
 
 [ChatGPT brainstorming session](https://chatgpt.com/share/6846c79f-55f8-800f-8aba-1ec4d1ec2158)
+
+## Integration with FormExpert
+
+Matt Bernier from ID345
+
+https://formexpert.co/
+
+Might need to deal with FE not storing form data at rest - they ship it to us and we store it on our servers, encrypted.
+
+- encrypt data at rest
+- salt encrypition with something related to the login session
+- only decrypted when user is logged in
+- bring your own key
+
+## Integration with Google forms
+samples
+https://docs.google.com/forms/d/e/1FAIpQLSdrQocAB2lXP7n1Fq1_PO3gDvN0D4Crl7ZG8b-xPaLOcGo8bw/viewform?usp=header
+https://forms.gle/zpDJyJX56HEj9LVv8
+
+## PDF Forms
