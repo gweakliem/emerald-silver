@@ -1,7 +1,7 @@
 import { db } from '~/lib/db'
-import { users, clients } from '~/lib/db/schema'
+import { users, clients, worksheetInstances } from '~/lib/db/schema'
 import { verifySession } from '~/lib/auth/session'
-import { eq, and, count, sql } from 'drizzle-orm'
+import { eq, and, count, sql, inArray } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -34,10 +34,31 @@ export default defineEventHandler(async (event) => {
 
     const totalClients = totalClientsResult[0]?.count || 0
 
-    // For now, use placeholder data for worksheet-related stats
-    // These will be updated once worksheet tables are created
-    const activeWorksheets = 0
-    const pendingReviews = 0
+    // Get active worksheets (assigned but not completed)
+    const activeWorksheetsResult = await db
+      .select({ count: count() })
+      .from(worksheetInstances)
+      .where(
+        and(
+          eq(worksheetInstances.providerId, providerId),
+          inArray(worksheetInstances.status, ['pending', 'in_progress', 'overdue'])
+        )
+      )
+
+    const activeWorksheets = activeWorksheetsResult[0]?.count || 0
+
+    // Get pending reviews (completed worksheets awaiting review)
+    const pendingReviewsResult = await db
+      .select({ count: count() })
+      .from(worksheetInstances)
+      .where(
+        and(
+          eq(worksheetInstances.providerId, providerId),
+          eq(worksheetInstances.status, 'completed')
+        )
+      )
+
+    const pendingReviews = pendingReviewsResult[0]?.count || 0
 
     // Get recent activity (active clients in last 30 days)
     const thirtyDaysAgo = new Date()
