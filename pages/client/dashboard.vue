@@ -23,6 +23,20 @@
       <div class="mb-8">
         <h2 class="text-lg font-medium text-gray-900 mb-4">Your Worksheets</h2>
         
+        <!-- Error Message -->
+        <div v-if="error" class="mb-6">
+          <div class="bg-red-50 border border-red-200 rounded-md p-4">
+            <div class="flex">
+              <svg class="w-5 h-5 text-red-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <div class="ml-3">
+                <p class="text-sm text-red-700">{{ error }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
         <div v-if="isLoading" class="text-center py-8">
           <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           <p class="mt-2 text-sm text-gray-500">Loading worksheets...</p>
@@ -51,34 +65,59 @@
                       {{ worksheet.description }}
                     </p>
                     <div class="mt-2 flex items-center text-xs text-gray-500">
-                      <span>Due: {{ formatDate(worksheet.dueDate) }}</span>
+                      <span v-if="worksheet.dueDate">Due: {{ formatDate(worksheet.dueDate) }}</span>
+                      <span v-else>No due date</span>
                       <span class="mx-2">•</span>
                       <span :class="getStatusColor(worksheet.status)">
                         {{ getStatusText(worksheet.status) }}
                       </span>
                     </div>
                   </div>
-                  <div class="flex-shrink-0">
+                  <div class="flex-shrink-0 flex space-x-2">
                     <button
-                      v-if="worksheet.status === 'pending'"
-                      @click="startWorksheet(worksheet.id)"
-                      class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      v-if="worksheet.status === 'pending' || worksheet.status === 'overdue' || worksheet.status === 'in_progress'"
+                      @click="completeWorksheet(worksheet)"
+                      :disabled="isCompleting === worksheet.id"
+                      class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Start
-                    </button>
-                    <button
-                      v-else-if="worksheet.status === 'in_progress'"
-                      @click="continueWorksheet(worksheet.id)"
-                      class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                    >
-                      Continue
+                      <svg v-if="isCompleting === worksheet.id" class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      {{ isCompleting === worksheet.id ? 'Completing...' : 'Mark Complete' }}
                     </button>
                     <span
-                      v-else
-                      class="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium text-gray-500"
+                      v-else-if="worksheet.status === 'completed'"
+                      class="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium text-green-600"
                     >
+                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
                       Completed
                     </span>
+                    
+                    <!-- View/Open worksheet link -->
+                    <button
+                      v-if="worksheet.type === 'pdf' && worksheet.pdfUrl"
+                      @click="openWorksheet(worksheet.pdfUrl)"
+                      class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      title="View PDF"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                      </svg>
+                    </button>
+                    <button
+                      v-else-if="worksheet.type === 'google_forms' && worksheet.googleFormsUrl"
+                      @click="openWorksheet(worksheet.googleFormsUrl)"
+                      class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      title="Open Form"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                      </svg>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -104,32 +143,38 @@ if (!user.value?.user || user.value.user.role !== 'client') {
 
 const worksheets = ref([])
 const isLoading = ref(true)
+const error = ref('')
+const isCompleting = ref(null) // Track which worksheet is being completed
 
-// Mock data for now - will be replaced with real API call
-onMounted(() => {
-  // Simulate loading
-  setTimeout(() => {
-    worksheets.value = [
-      {
-        id: '1',
-        title: 'Initial Assessment',
-        description: 'Complete your initial assessment questionnaire',
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-        status: 'pending'
-      },
-      {
-        id: '2',
-        title: 'Weekly Check-in',
-        description: 'Complete your weekly progress check-in',
-        dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
-        status: 'in_progress'
-      }
-    ]
-    isLoading.value = false
-  }, 1000)
+// Load assigned worksheets
+onMounted(async () => {
+  await loadWorksheets()
 })
 
+async function loadWorksheets() {
+  try {
+    isLoading.value = true
+    error.value = ''
+    
+    const response = await $fetch('/api/client/worksheets')
+    
+    if (response.success) {
+      worksheets.value = response.worksheets
+    }
+  } catch (err) {
+    if (err.status === 401 || err.status === 403) {
+      await navigateTo('/client/login')
+    } else {
+      error.value = 'Failed to load worksheets'
+      console.error('Load worksheets error:', err)
+    }
+  } finally {
+    isLoading.value = false
+  }
+}
+
 function formatDate(date) {
+  if (!date) return 'No due date'
   return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
@@ -145,6 +190,8 @@ function getStatusColor(status) {
       return 'text-blue-600'
     case 'completed':
       return 'text-green-600'
+    case 'overdue':
+      return 'text-red-600'
     default:
       return 'text-gray-600'
   }
@@ -158,17 +205,47 @@ function getStatusText(status) {
       return 'In Progress'
     case 'completed':
       return 'Completed'
+    case 'overdue':
+      return 'Overdue'
     default:
       return 'Unknown'
   }
 }
 
-function startWorksheet(worksheetId) {
-  navigateTo(`/client/worksheet/${worksheetId}`)
+async function completeWorksheet(worksheet) {
+  try {
+    isCompleting.value = worksheet.id
+    
+    const response = await $fetch(`/api/client/worksheets/${worksheet.id}/complete`, {
+      method: 'POST'
+    })
+    
+    if (response.success) {
+      // Update the worksheet status in the local state
+      const worksheetIndex = worksheets.value.findIndex(w => w.id === worksheet.id)
+      if (worksheetIndex !== -1) {
+        worksheets.value[worksheetIndex].status = 'completed'
+        worksheets.value[worksheetIndex].completedAt = response.worksheet.completedAt
+      }
+      
+      // Show success message (you could add a toast notification here)
+      console.log('Worksheet completed successfully')
+    }
+  } catch (err) {
+    console.error('Complete worksheet error:', err)
+    error.value = err.data?.message || 'Failed to complete worksheet'
+    
+    // Clear error after 5 seconds
+    setTimeout(() => {
+      error.value = ''
+    }, 5000)
+  } finally {
+    isCompleting.value = null
+  }
 }
 
-function continueWorksheet(worksheetId) {
-  navigateTo(`/client/worksheet/${worksheetId}`)
+function openWorksheet(url) {
+  window.open(url, '_blank')
 }
 
 async function logout() {
