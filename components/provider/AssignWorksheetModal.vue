@@ -21,9 +21,12 @@
               </svg>
             </button>
           </div>
-          <div v-if="client" class="mt-2">
-            <p class="text-sm text-gray-600">
+          <div class="mt-2">
+            <p v-if="client" class="text-sm text-gray-600">
               Assign a worksheet to <strong>{{ client.name }}</strong>
+            </p>
+            <p v-else class="text-sm text-gray-600">
+              Select a client and assign them a worksheet
             </p>
           </div>
         </div>
@@ -38,7 +41,7 @@
             </div>
             <h3 class="mt-4 text-lg font-medium text-gray-900">Worksheet Assigned Successfully!</h3>
             <p class="mt-2 text-sm text-gray-600">
-              "{{ assignedWorksheet?.template?.title }}" has been assigned to {{ client?.name }}.
+              "{{ assignedWorksheet?.template?.title }}" has been assigned to {{ getClientName() }}.
             </p>
           </div>
 
@@ -55,12 +58,46 @@
         <!-- Form -->
         <form v-else @submit.prevent="submitForm" class="px-6 py-4">
           <div class="space-y-4">
+            <!-- Client Selection (when no client is pre-selected) -->
+            <div v-if="!client">
+              <label for="client" class="block text-sm font-medium text-gray-700">
+                Select Client *
+              </label>
+              <select
+                id="client"
+                v-model="form.clientId"
+                required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                :class="{ 'border-red-300': errors.clientId }"
+                :disabled="isLoading || isLoadingClients"
+              >
+                <option value="">Select a client...</option>
+                <option 
+                  v-for="client in clients" 
+                  :key="client.id" 
+                  :value="client.id"
+                >
+                  {{ client.name }} ({{ client.email }})
+                </option>
+              </select>
+              <p v-if="errors.clientId" class="mt-1 text-sm text-red-600">{{ errors.clientId }}</p>
+              <p v-if="isLoadingClients" class="mt-1 text-sm text-gray-500">Loading clients...</p>
+            </div>
+
             <!-- Worksheet Selection -->
             <div>
               <label for="worksheet" class="block text-sm font-medium text-gray-700">
-                Select Worksheet *
+                {{ worksheet ? 'Worksheet' : 'Select Worksheet' }} *
               </label>
+              
+              <!-- Pre-selected worksheet (when coming from worksheet page) -->
+              <div v-if="worksheet" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900">
+                {{ worksheet.title }} ({{ worksheet.type }})
+              </div>
+              
+              <!-- Worksheet selection dropdown (when coming from client detail page) -->
               <select
+                v-else
                 id="worksheet"
                 v-model="form.templateId"
                 required
@@ -78,7 +115,7 @@
                 </option>
               </select>
               <p v-if="errors.templateId" class="mt-1 text-sm text-red-600">{{ errors.templateId }}</p>
-              <p v-if="isLoadingTemplates" class="mt-1 text-sm text-gray-500">Loading worksheets...</p>
+              <p v-if="!worksheet && isLoadingTemplates" class="mt-1 text-sm text-gray-500">Loading worksheets...</p>
             </div>
 
             <!-- Due Date -->
@@ -166,6 +203,10 @@ const props = defineProps({
   client: {
     type: Object,
     default: null
+  },
+  worksheet: {
+    type: Object,
+    default: null
   }
 })
 
@@ -173,6 +214,7 @@ const emit = defineEmits(['close', 'assigned'])
 
 const form = ref({
   templateId: '',
+  clientId: '',
   dueDate: '',
   notes: ''
 })
@@ -186,14 +228,37 @@ const assignedWorksheet = ref(null)
 const worksheetTemplates = ref([])
 const isLoadingTemplates = ref(false)
 
+const clients = ref([])
+const isLoadingClients = ref(false)
+
 const isFormValid = computed(() => {
-  return form.value.templateId && !Object.keys(errors.value).length
+  const hasTemplateId = form.value.templateId
+  const hasClientId = props.client ? true : form.value.clientId
+  return hasTemplateId && hasClientId && !Object.keys(errors.value).length
 })
 
-// Load worksheet templates when modal opens
+// Load worksheet templates and clients when modal opens
 watch(() => props.isOpen, async (isOpen) => {
+  console.log('Modal isOpen changed:', isOpen)
   if (isOpen) {
-    await loadWorksheetTemplates()
+    console.log('Modal opened - props.worksheet:', props.worksheet)
+    console.log('Modal opened - props.client:', props.client)
+    
+    if (props.worksheet) {
+      // Pre-populate form with the selected worksheet
+      form.value.templateId = props.worksheet.id
+    } else {
+      // Load all available templates for selection
+      await loadWorksheetTemplates()
+    }
+    
+    // Load clients if no client is pre-selected
+    if (!props.client) {
+      console.log('Loading clients because no client prop')
+      await loadClients()
+    } else {
+      console.log('Not loading clients because client prop exists')
+    }
   }
 })
 
@@ -210,11 +275,30 @@ async function loadWorksheetTemplates() {
   }
 }
 
+async function loadClients() {
+  try {
+    isLoadingClients.value = true
+    const response = await $fetch('/api/provider/clients')
+    console.log('Clients response:', response)
+    clients.value = response.clients
+    console.log('Clients loaded:', clients.value)
+  } catch (err) {
+    console.error('Failed to load clients:', err)
+    error.value = 'Failed to load clients'
+  } finally {
+    isLoadingClients.value = false
+  }
+}
+
 function validateForm() {
   errors.value = {}
 
   if (!form.value.templateId) {
     errors.value.templateId = 'Please select a worksheet'
+  }
+
+  if (!props.client && !form.value.clientId) {
+    errors.value.clientId = 'Please select a client'
   }
 
   return Object.keys(errors.value).length === 0
@@ -229,7 +313,7 @@ async function submitForm() {
   try {
     const payload = {
       templateId: form.value.templateId,
-      clientId: props.client.id,
+      clientId: props.client?.id || form.value.clientId,
       dueDate: form.value.dueDate || null,
       notes: form.value.notes || null
     }
@@ -259,6 +343,7 @@ function close() {
   // Reset form
   form.value = {
     templateId: '',
+    clientId: '',
     dueDate: '',
     notes: ''
   }
@@ -275,4 +360,17 @@ function close() {
 watch(() => form.value.templateId, () => {
   if (errors.value.templateId) delete errors.value.templateId
 })
+
+watch(() => form.value.clientId, () => {
+  if (errors.value.clientId) delete errors.value.clientId
+})
+
+function getClientName() {
+  if (props.client) {
+    return props.client.name
+  }
+  
+  const selectedClient = clients.value.find(c => c.id === form.value.clientId)
+  return selectedClient?.name || 'the selected client'
+}
 </script>
