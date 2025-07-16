@@ -106,6 +106,7 @@ docker-compose up -d
 ```
 
 **Traditional Migration Approach:**
+
 ```bash
 npm run db:generate  # Generate migrations
 npm run db:migrate   # Apply migrations

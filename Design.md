@@ -94,3 +94,18 @@ https://docs.google.com/forms/d/e/1FAIpQLSdrQocAB2lXP7n1Fq1_PO3gDvN0D4Crl7ZG8b-x
 https://forms.gle/zpDJyJX56HEj9LVv8
 
 ## PDF Forms
+
+### Competition
+https://clevika-mvp.vercel.app/#features
+More oriented towards tutoring
+AI-generated worksheets
+
+https://toolsedu.com/
+Building education worksheets / assignments
+
+https://zapier.com/blog/best-online-form-builder-software/#formstack
+https://www.formstack.com/pricing
+Forms - enterprise level is negotiated includes things like HIPAA
+
+https://www.formsite.com/
+Built on Formstack
